@@ -1,0 +1,128 @@
+{% extends "base.html" %} {% block content %}
+<div class="form-container" style="text-align: center">
+  <h1>⚡ Reaction Test</h1>
+  <p>
+    Wait for <b style="color: green">GREEN</b> and click as fast as you can!
+  </p>
+
+  <div id="box">Click "Start" to begin</div>
+  <button id="startBtn">▶ Start</button>
+
+  <p id="status"></p>
+  <p id="result"></p>
+</div>
+
+<style>
+  #box {
+    width: 400px;
+    height: 250px;
+    margin: 20px auto;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    background: lightgray;
+    border: 3px solid #333;
+    cursor: pointer;
+    color: white;
+    transition: background 0.3s, transform 0.2s;
+  }
+  #box.active {
+    animation: pulse 1s infinite;
+  }
+  button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
+
+<script>
+  let round = 0,
+    reactionTimes = [],
+    startTime,
+    waiting = false,
+    colorInterval;
+  const box = document.getElementById("box"),
+    statusText = document.getElementById("status"),
+    resultText = document.getElementById("result");
+  document.getElementById("startBtn").onclick = () => startGame();
+
+  function startGame() {
+    round = 0;
+    reactionTimes = [];
+    resultText.innerText = "";
+    statusText.innerText = "Game started.";
+    nextRound();
+  }
+  function nextRound() {
+    if (round >= 3) {
+      endGame();
+      return;
+    }
+    round++;
+    statusText.innerText = `Round ${round} of 3`;
+    box.style.background = "lightgray";
+    box.innerText = "Wait...";
+    box.classList.remove("active");
+    let colors = ["red", "blue"],
+      index = 0;
+    clearInterval(colorInterval);
+    colorInterval = setInterval(() => {
+      if (Math.random() < 0.3 && round <= 3 && index > 0) {
+        box.style.background = "green";
+        box.innerText = "GREEN";
+        box.classList.add("active");
+        startTime = new Date().getTime();
+        waiting = true;
+      } else {
+        box.style.background = colors[index % 2];
+        box.innerText = colors[index % 2].toUpperCase();
+        waiting = false;
+        box.classList.remove("active");
+        index++;
+      }
+    }, 2000);
+  }
+  box.onclick = () => {
+    if (waiting) {
+      const reactionTime = new Date().getTime() - startTime;
+      reactionTimes.push(reactionTime);
+      statusText.innerText = `✅ Round ${round}: ${reactionTime} ms`;
+      waiting = false;
+      box.classList.remove("active");
+      clearInterval(colorInterval);
+      setTimeout(nextRound, 2000);
+    } else {
+      statusText.innerText = `❌ Wrong click!`;
+    }
+  };
+  function endGame() {
+    const avg = Math.round(
+      reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length
+    );
+    resultText.innerHTML = `<b>🎉 Game Over!</b><br>Avg: ${avg || 0} ms`;
+    fetch("/save_game_result", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ game: "reaction", final_time: avg || 0 }),
+    }).then(() => setTimeout(() => (window.location.href = "/dashboard"), 500));
+  }
+</script>
+{% endblock %}

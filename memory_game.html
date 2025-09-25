@@ -1,0 +1,142 @@
+{% extends "base.html" %} {% block content %}
+<div class="form-container" style="text-align: center">
+  <h1>🎴 Memory Game</h1>
+  <p>Flip the cards and match pairs as quickly as possible!</p>
+  <div id="game" class="grid"></div>
+  <p id="result"></p>
+  <button onclick="startGame()">🔄 Restart</button>
+</div>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 120px);
+    gap: 15px;
+    justify-content: center;
+    margin: 20px auto;
+  }
+  .card {
+    width: 120px;
+    height: 120px;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+  .card-front,
+  .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  .card-front {
+    background: #e0f7fa;
+    color: transparent;
+  }
+  .card-back {
+    background: #4caf50;
+    color: white;
+    transform: rotateY(180deg);
+  }
+  .matched .card-back {
+    background: #81c784;
+  }
+</style>
+
+<script>
+  const cardsArray = ["🍎", "🍎", "🍌", "🍌", "🍇", "🍇", "🍓", "🍓"];
+  let gameGrid, firstCard, secondCard, lockBoard, matches, attempts, startTime;
+
+  function startGame() {
+    document.getElementById("result").innerText = "";
+    gameGrid = [...cardsArray].sort(() => 0.5 - Math.random());
+    const game = document.getElementById("game");
+    game.innerHTML = "";
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+    matches = 0;
+    attempts = 0;
+    startTime = new Date().getTime();
+
+    gameGrid.forEach((emoji) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-front"></div>
+          <div class="card-back">${emoji}</div>
+        </div>`;
+      card.addEventListener("click", flipCard);
+      game.appendChild(card);
+    });
+  }
+
+  function flipCard() {
+    if (lockBoard || this === firstCard || this.classList.contains("flipped"))
+      return;
+    this.classList.add("flipped");
+    if (!firstCard) {
+      firstCard = this;
+      return;
+    }
+    secondCard = this;
+    lockBoard = true;
+    attempts++;
+    if (
+      firstCard.querySelector(".card-back").textContent ===
+      secondCard.querySelector(".card-back").textContent
+    ) {
+      firstCard.classList.add("matched");
+      secondCard.classList.add("matched");
+      resetBoard();
+      matches++;
+      if (matches === cardsArray.length / 2) {
+        const totalTime = Math.floor((new Date().getTime() - startTime) / 1000);
+        document.getElementById(
+          "result"
+        ).innerText = `🎉 Done! Attempts: ${attempts}, Time: ${totalTime}s`;
+        fetch("/save_game_result", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            game: "memory",
+            attempts: attempts,
+            time: totalTime,
+          }),
+        }).then(() =>
+          setTimeout(() => (window.location.href = "/dashboard"), 500)
+        );
+      }
+    } else {
+      setTimeout(() => {
+        firstCard.classList.remove("flipped");
+        secondCard.classList.remove("flipped");
+        resetBoard();
+      }, 1000);
+    }
+  }
+  function resetBoard() {
+    [firstCard, secondCard, lockBoard] = [null, null, false];
+  }
+  startGame();
+</script>
+{% endblock %}

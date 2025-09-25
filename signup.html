@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block content %}
+<div class="auth-container">
+  <h2>📝 Sign Up</h2>
+  <form method="POST" class="auth-form">
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        type="text"
+        name="username"
+        required
+        placeholder="Choose a username"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        name="password"
+        required
+        placeholder="Choose a strong password"
+      />
+    </div>
+
+    <button type="submit" class="btn-auth">Sign Up</button>
+  </form>
+
+  <p class="switch-link">
+    Already have an account? <a href="{{ url_for('login') }}">Login</a>
+  </p>
+</div>
+{% endblock %}

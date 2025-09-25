@@ -1,0 +1,105 @@
+{% extends "base.html" %} {% block content %}
+<div class="form-container result-container card">
+  <h1>Diagnosis Result</h1>
+
+  <!-- Risk Label -->
+  <h2
+    class="{% if 'Low' in prediction %}risk-low{% elif 'Moderate' in prediction %}risk-moderate{% else %}risk-high{% endif %}"
+  >
+    {{ prediction }}
+  </h2>
+
+  <!-- Memory Score -->
+  <h3>🧠 Memory Health</h3>
+  <div class="progress-bar">
+    <div
+      class="progress {{ memory_class }}"
+      style="--bar-width: {{ memory_score|default(0) }}%"
+    ></div>
+  </div>
+  <p>{{ memory_score }}% — {{ memory_category }}</p>
+
+  <!-- Reaction Speed -->
+  <h3>⚡ Reaction Speed</h3>
+  <div class="progress-bar">
+    <div
+      class="progress {{ reaction_class }}"
+      style="--bar-width: {{ reaction_score|default(0) }}%"
+    ></div>
+  </div>
+  <p>{{ reaction_score }}% — {{ reaction_category }}</p>
+
+  <!-- Alzheimer Detection Form -->
+  <h3>🧾 Alzheimer Detection Form</h3>
+  <div class="progress-bar">
+    <div
+      class="progress {{ lifestyle_class }}"
+      style="--bar-width: {{ lifestyle_score|default(0) }}%"
+    ></div>
+  </div>
+  <p>{{ lifestyle_score }}% — {{ lifestyle_category }}</p>
+
+  <hr />
+
+  <!-- Personal Health Summary -->
+  <h3>📘 Personal Health Summary</h3>
+  <p>{{ story }}</p>
+
+  <!-- Recommendations -->
+  <h3>🩺 Recommended Actions</h3>
+  {% for category, recs in recommendations.items() %} {% if recs %}
+  <h4>📍 {{ category }}</h4>
+  <ul>
+    {% for rec in recs %}
+    <li>{{ rec }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %} {% endfor %}
+
+  <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
+</div>
+
+<style>
+  .progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .progress {
+    height: 100%;
+    border-radius: 10px;
+    width: var(--bar-width, 0%);
+  }
+
+  /* Memory/Reaction colors */
+  .progress-green {
+    background: #4caf50;
+  } /* Excellent */
+  .progress-yellow {
+    background: #cddc39;
+  } /* Good */
+  .progress-orange {
+    background: #ff9800;
+  } /* Fair */
+  .progress-red {
+    background: #f44336;
+  } /* Needs Improvement */
+
+  /* Lifestyle (reversed meaning) */
+  .progress-darkred {
+    background: #b71c1c;
+  } /* 🚨 High Negative Impact */
+  .progress-redorange {
+    background: #ff5722;
+  } /* ⚠️ Concerning Impact */
+  .progress-orange {
+    background: #ff9800;
+  } /* 🙂 Moderate Impact */
+  .progress-green {
+    background: #4caf50;
+  } /* 🌟 Low Impact */
+</style>
+{% endblock %}

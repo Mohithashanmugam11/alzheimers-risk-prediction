@@ -1,0 +1,140 @@
+{% extends "base.html" %} {% block content %}
+<div class="form-container">
+  <h1>🧠 Alzheimer’s Disease Diagnosis</h1>
+  <form method="POST">
+    <div class="form-grid">
+      <!-- Column 1 -->
+      <div class="form-column">
+        <div class="card" style="margin-bottom: 16px; background: #f9f9f9">
+          <h3>🧾 Personal Info</h3>
+          <label>Age:</label>
+          <input type="number" name="Age" required />
+
+          <label>Gender (0 = Male, 1 = Female):</label>
+          <input type="number" name="Gender" min="0" max="1" required />
+
+          <label>Ethnicity (0-7):</label>
+          <input type="number" name="Ethnicity" min="1" max="8" required />
+          <small
+            >0=White, 1=Hispanic, 2=Black, 3=Asian, 4=Native American, 5=MENA,
+            6=American Indian, 7=Pacific Islander</small
+          >
+
+          <label>Education Level (0-5):</label>
+          <input type="number" name="EducationLevel" min="1" max="6" required />
+          <small
+            >0=Early Education, 1=Primary, 2=Lower Sec, 3=Upper Sec, 4=Post-Sec,
+            5=Short Tertiary</small
+          >
+
+          <label>BMI:</label>
+          <input type="number" step="0.1" name="BMI" required />
+        </div>
+
+        <div class="card" style="margin-bottom: 16px; background: #f1f8e9">
+          <h3>🩺 Health Habits</h3>
+          {% for field in
+          ['Smoking','AlcoholConsumption','PhysicalActivity','DietQuality','SleepQuality','FamilyHistoryAlzheimers','CardiovascularDisease','Diabetes']
+          %}
+          <label>{{ field }} (0 = No, 1 = Yes):</label>
+          <input type="number" name="{{ field }}" min="0" max="1" required />
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Column 2 -->
+      <div class="form-column">
+        <div class="card" style="margin-bottom: 16px; background: #e3f2fd">
+          <h3>🧠 Cognitive & Medical</h3>
+          <label>SystolicBP (0=Low,1=Normal,2=High):</label>
+          <input type="number" name="SystolicBP" min="0" max="2" required />
+
+          <label>DiastolicBP (0=Low,1=Normal,2=High):</label>
+          <input type="number" name="DiastolicBP" min="0" max="2" required />
+
+          <label>CholesterolTotal (0=Low,1=Normal,2=High):</label>
+          <input
+            type="number"
+            name="CholesterolTotal"
+            min="0"
+            max="2"
+            required
+          />
+
+          <label>CholesterolLDL (0=Healthy,1=Borderline,2=High Risk):</label>
+          <input type="number" name="CholesterolLDL" min="0" max="2" required />
+
+          <label>CholesterolHDL (0=Healthy,1=Borderline,2=High Risk):</label>
+          <input type="number" name="CholesterolHDL" min="0" max="2" required />
+
+          <label
+            >CholesterolTriglycerides (0=Normal,1=Borderline High,3=Very
+            High):</label
+          >
+          <input
+            type="number"
+            name="CholesterolTriglycerides"
+            min="0"
+            max="3"
+            required
+          />
+
+          {% for field in
+          ['Depression','HeadInjury','Hypertension','MemoryComplaints','BehavioralProblems']
+          %}
+          <label>{{ field }} (0 = No, 1 = Yes):</label>
+          <input type="number" name="{{ field }}" min="0" max="1" required />
+          {% endfor %}
+        </div>
+
+        <div class="card" style="background: #fff3e0">
+          <h3>📝 Assessments</h3>
+          {% for field in ['MMSE_Moderate Impairment','MMSE_Normal Cognitive
+          Function','MMSE_Severe
+          Impairment','FunctionalAssessment_Normal','FunctionalAssessment_Severe
+          Impairment','ADL_Independent','ADL_Needs
+          Assistance','Confusion_Yes','Disorientation_Yes','PersonalityChanges_Yes','Forgetfulness_Yes']
+          %}
+          <label>{{ field }} (TRUE/FALSE):</label>
+          <select name="{{ field }}" required>
+            <option value="TRUE">TRUE</option>
+            <option value="FALSE">FALSE</option>
+          </select>
+          {% endfor %}
+
+          <label
+            >DifficultyCompletingTasks (1=No Difficulty,2=Some,3=Severe):</label
+          >
+          <input
+            type="number"
+            name="DifficultyCompletingTasks"
+            min="1"
+            max="3"
+            required
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden fields -->
+    <input
+      type="hidden"
+      name="MemoryGame_Attempts"
+      value="{{ session.get('MemoryGame_Attempts', 0) }}"
+    />
+    <input
+      type="hidden"
+      name="ReactionGame_FinalAvg"
+      value="{{ session.get('ReactionGame_FinalAvg', 0.0) }}"
+    />
+
+    <div class="button-container">
+      <button type="submit">Predict</button>
+    </div>
+  </form>
+
+  {% if prediction %}
+  <h2>Prediction Result: {{ prediction }}</h2>
+  {% endif %}
+</div>
+{% endblock %}

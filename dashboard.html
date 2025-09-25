@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block content %}
+<div class="dashboard-container">
+  <h1>Welcome, {{ session['user'] }}</h1>
+
+  <div class="game-summary card">
+    <h2>Your Game Results</h2>
+    <p>
+      <strong>Memory Game Attempts:</strong> {{
+      session.get('MemoryGame_Attempts', 0) }}
+    </p>
+    <p>
+      <strong>Reaction Game Avg Time:</strong> {{
+      session.get('ReactionGame_FinalAvg', 0.0) }} ms
+    </p>
+  </div>
+
+  <div class="dashboard-grid">
+    <a class="dashboard-card" href="{{ url_for('reaction_game') }}"
+      >🎯 Play Reaction Game</a
+    >
+    <a class="dashboard-card" href="{{ url_for('memory_game') }}"
+      >🧠 Play Memory Game</a
+    >
+    <a class="dashboard-card" href="{{ url_for('diagnosis') }}"
+      >🩺 Run Diagnosis</a
+    >
+    <a class="dashboard-card" href="{{ url_for('show_result') }}"
+      >📊 View Result</a
+    >
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title if title else "Alzheimer's Health" }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body
+    class="{{ 'dark-theme' if request.cookies.get('theme') == 'dark' else '' }}"
+  >
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="logo">🧠</div>
+        <div class="app-name">Alzheimer’s Health</div>
+      </div>
+
+      <nav class="nav-center">
+        <a href="{{ url_for('dashboard') }}">🏠 Home</a>
+      </nav>
+
+      <div class="nav-right">
+        <!-- Theme toggle -->
+        <button id="theme-toggle" class="theme-toggle">🌙 Theme</button>
+
+        <!-- username -->
+        <div class="user-name">👤 {{ session.get('user', 'Guest') }}</div>
+
+        <!-- logout -->
+        {% if session.get('user') %}
+        <a href="{{ url_for('logout') }}"
+          ><button class="logout-btn">Logout</button></a
+        >
+        {% else %}
+        <a href="{{ url_for('login') }}"><button class="btn">Login</button></a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">{% block content %}{% endblock %}</main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="col">
+        <h4>🌿 Healthy Reminder</h4>
+        <p id="healthy-tip">Loading Alzheimer-friendly tips…</p>
+      </div>
+
+      <div class="col">
+        <h4>📊 Progress Tracker</h4>
+        <div class="progress-list">
+          <div>Memory: {{ session.get('final_memory', '--') }}/100</div>
+          <div>Reaction: {{ session.get('final_reaction', '--') }}/100</div>
+          <div>Lifestyle: {{ session.get('final_lifestyle', '--') }}/100</div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      /* Theme toggle */
+      (function () {
+        const btn = document.getElementById("theme-toggle");
+        const applyTheme = (mode) => {
+          if (mode === "dark") {
+            document.body.classList.add("dark-theme");
+            document.cookie = "theme=dark; path=/";
+            localStorage.setItem("theme", "dark");
+            btn.textContent = "☀️ Light";
+          } else {
+            document.body.classList.remove("dark-theme");
+            document.cookie =
+              "theme=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            localStorage.setItem("theme", "light");
+            btn.textContent = "🌙 Theme";
+          }
+        };
+
+        const saved = localStorage.getItem("theme") || "light";
+        applyTheme(saved);
+
+        btn.addEventListener("click", () => {
+          const now =
+            localStorage.getItem("theme") === "dark" ? "light" : "dark";
+          applyTheme(now);
+        });
+      })();
+
+      /* Healthy reminders */
+      (function () {
+        const tips = [
+          "Stick to a consistent daily routine to reduce confusion.",
+          "Engage in puzzles, memory games, or reading daily.",
+          "Take short walks or light exercise to stay active.",
+          "Eat a balanced diet with leafy greens and omega-3s.",
+          "Stay socially connected with family and friends.",
+          "Use reminders and notes to support memory.",
+        ];
+        const el = document.getElementById("healthy-tip");
+        if (el) el.textContent = tips[Math.floor(Math.random() * tips.length)];
+      })();
+    </script>
+  </body>
+</html>
